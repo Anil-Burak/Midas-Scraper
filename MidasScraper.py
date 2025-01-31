@@ -1,7 +1,8 @@
 import json
+import argparse
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-import argparse
+
 # from selenium.webdriver.chrome.options import Options
 
 parser = argparse.ArgumentParser(description="Hisse senetleri işleyen program.")
@@ -75,7 +76,7 @@ def hisseSor(hisseAdi):
                     for key, value in hisse.items():
                         print(f"{key}: {value}")
                     return
-                print(f"'{hisseAdi}' adında bir hisse bulunamadı.")
+            print(f"'{hisseAdi}' adında bir hisse bulunamadı.")
 
     except FileNotFoundError:
         print("Hisse verileri dosyası bulunamadı. Önce -yenile çalıştırın.")
