@@ -50,7 +50,8 @@ def artan():
             try:
                 fark = float(hisse["Fark"].replace(',', '.').replace('%', ''))  # Yüzde işaretini kaldır
                 if fark > 0:
-                    print(hisse['Hisse'])
+                    print(hisse['Hisse'],end="  ")
+                    print(hisse['Fark'])
             except ValueError:
                 continue
 
@@ -62,7 +63,8 @@ def azalan():
             try:
                 fark = float(hisse["Fark"].replace(',', '.').replace('%', ''))  # Yüzde işaretini kaldır
                 if fark < 0:
-                    print(hisse['Hisse'])
+                    print(hisse['Hisse'], end="  ")
+                    print(hisse['Fark'])
             except ValueError:
                 continue
 
