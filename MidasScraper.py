@@ -3,18 +3,15 @@ import argparse
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
-# from selenium.webdriver.chrome.options import Options
-
 parser = argparse.ArgumentParser(description="Hisse senetleri işleyen program.")
-parser.add_argument("-yenile", action="store_true", help="Verileri güncelle")
+parser.add_argument("-yenile",type=int, choices=[0,1], help="Verileri güncelle")
 parser.add_argument("-artan", action="store_true", help="Artan hisseleri göster")
 parser.add_argument("-azalan", action="store_true", help="Azalan hisseleri göster")
 parser.add_argument("-hisseSor", type=str, help="Sorulan hissenin verilerini göster")
 
 
-def yenile():
-    cService = webdriver.ChromeService(executable_path='C:\\Program Files (x86)\\chromedriver.exe')
-    driver = webdriver.Chrome(service=cService)
+def yenile(outputCheck):
+    driver = webdriver.Chrome()
     driver.get("https://www.getmidas.com/canli-borsa/")
     driver.implicitly_wait(2)
     driver.minimize_window()
@@ -23,16 +20,20 @@ def yenile():
     driver.find_element(By.CLASS_NAME, "btn.btn-primary.w-100").click()
     hisseSatirlari = driver.find_elements(By.TAG_NAME, "tr")[1:]
     tumVeriler = []
-    print("Hisse	Son	Alış	Satış	Fark	En Düşük	En Yüksek	AOF	Hacim TL	Hacim Lot")
     for i in range(len(hisseSatirlari)):
         seciliTr = hisseSatirlari[i]
         tdList = seciliTr.find_elements(By.TAG_NAME, "td")
         tdVerileri = [td.text for td in tdList]
         tumVeriler.append(tdVerileri)
-
-    for satir in tumVeriler:
-        print(satir)
     driver.quit()
+    if outputCheck:
+        print("Hisse	Son	Alış	Satış	Fark	En Düşük	En Yüksek	AOF	Hacim TL	Hacim Lot")
+        for satir in tumVeriler:
+            print(satir)
+    else:
+        print("Güncelleme yapıldı.")
+
+
 
     hisseAlanlari = ["Hisse", "Son", "Alis", "Satis", "Fark", "En Dusuk",
                      "En Yuksek", "AOF", "Hacim TL", "Hacim Lot"]
@@ -45,28 +46,39 @@ def yenile():
 
 def artan():
     with open('hisse-verileri.json', 'r') as file:
+        maks = 0
         okunanVeriler = json.load(file)
         for hisse in okunanVeriler:
             try:
-                fark = float(hisse["Fark"].replace(',', '.').replace('%', ''))  # Yüzde işaretini kaldır
+                fark = float(hisse["Fark"].replace(',', '.').replace('%', ''))
                 if fark > 0:
+                    if fark > maks:
+                        maks = fark
+                        maksHisse = hisse['Hisse']
                     print(hisse['Hisse'],end="  ")
                     print(hisse['Fark'])
             except ValueError:
                 continue
+        print(f"Günün en çok artan hissesi {maksHisse}, artış: {maks}")
 
 
 def azalan():
     with open('hisse-verileri.json', 'r') as file:
+        min = 0
         okunanVeriler = json.load(file)
         for hisse in okunanVeriler:
             try:
-                fark = float(hisse["Fark"].replace(',', '.').replace('%', ''))  # Yüzde işaretini kaldır
+                fark = float(hisse["Fark"].replace(',', '.').replace('%', ''))
                 if fark < 0:
+                    if fark < min:
+                        min = fark
+                        minHisse = hisse['Hisse']
                     print(hisse['Hisse'], end="  ")
                     print(hisse['Fark'])
             except ValueError:
                 continue
+        print(f"Günün en çok düşen hissesi {minHisse}, düşüş: {min}")
+
 
 
 def hisseSor(hisseAdi):
@@ -85,8 +97,8 @@ def hisseSor(hisseAdi):
 
 
 args = parser.parse_args()
-if args.yenile:
-    yenile()
+if args.yenile is not None:
+    yenile(args.yenile)
 elif args.artan:
     artan()
 elif args.azalan:
